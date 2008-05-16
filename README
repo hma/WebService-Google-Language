@@ -1,0 +1,72 @@
+WebService::Google::Language
+============================
+
+WebService::Google::Language is an object-oriented interface to the
+Google AJAX Language API (http://code.google.com/apis/ajaxlanguage/).
+
+The AJAX Language API is a web service to translate and detect the language
+of blocks of text.
+
+
+SYNOPSIS
+
+    use WebService::Google::Language;
+
+    $service = WebService::Google::Language->new(
+      'referer' => 'http://example.com/',
+      'src'     => '',
+      'dest'    => 'en',
+    );
+
+    $result = $service->translate('Hallo Welt');
+    if ($result->error) {
+      printf "Error code: %s\n", $result->code;
+      printf "Message:    %s\n", $result->message;
+    }
+    else {
+      printf "Detected language: %s\n", $result->language;
+      printf "Translation:       %s\n", $result->translation;
+    }
+
+    $result = $service->detect('Bonjour tout le monde');
+    printf "Detected language: %s\n", $result->language;
+    printf "Is reliable:       %s\n", $result->is_reliable ? 'yes' : 'no';
+    printf "Confidence:        %s\n", $result->confidence;
+
+
+INSTALLATION
+
+To install this module, run the following commands:
+
+    perl Makefile.PL
+    make
+    make test
+    make install
+
+
+DEPENDENCIES
+
+This module requires these other modules:
+
+    Carp
+    JSON 2.0+
+    LWP::UserAgent
+    Test::More     (required by "make test")
+    URI::Escape
+
+
+DOCUMENTATION
+
+After installing, you can find documentation for this module with
+the perldoc command:
+
+    perldoc WebService::Google::Language
+
+
+COPYRIGHT AND LICENCE
+
+Copyright 2008 Henning Manske, State and University Library Hamburg.
+All rights reserved.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
