@@ -2,9 +2,9 @@ use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
-WriteMakefile(
+my %conf = (
     NAME                => 'WebService::Google::Language',
-    AUTHOR              => 'Henning Manske <henning.manske@googlemail.com>',
+    AUTHOR              => 'Henning Manske <hma@cpan.org>',
     VERSION_FROM        => 'lib/WebService/Google/Language.pm',
     ABSTRACT_FROM       => 'lib/WebService/Google/Language.pm',
     PL_FILES            => {},
@@ -18,3 +18,7 @@ WriteMakefile(
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'WebService-Google-Language-*' },
 );
+
+$conf{'LICENSE'} = 'perl' if $ExtUtils::MakeMaker::VERSION > '6.30';
+
+WriteMakefile(%conf);

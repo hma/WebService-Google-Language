@@ -1,4 +1,11 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.02    May 19, 2008
+
+        - FIX: respect proxy environment variables (reported by IZUT)
+
+        - Made accessors for embedded JSON and LWP::UserAgent instances
+        - JSON and LWP::UserAgent instances can be passed to constructor
+
 0.01    May 16, 2008
         - Initial release

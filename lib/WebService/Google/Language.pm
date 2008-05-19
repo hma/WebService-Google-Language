@@ -3,7 +3,7 @@ package WebService::Google::Language;
 use strict;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use Carp;
 use JSON 2.0 ();
@@ -29,18 +29,23 @@ sub new {
   croak "Constructor requires a non-empty parameter 'referer'"
     unless defined $referer and $referer =~ /\S/;
 
-  my $self = { 'json' => JSON->new };
-
-  for (qw(src dest key)) {
+  my $self = {};
+  for (qw(src dest key ua json)) {
     if (defined(my $value = delete $conf{$_})) {
       $self->{$_} = $value;
     }
   }
+  unless (ref $self->{'json'} and $self->{'json'}->isa('JSON')) {
+    $self->{'json'} = JSON->new;
+  }
+  unless (ref $self->{'ua'} and $self->{'ua'}->isa('LWP::UserAgent')) {
+    $conf{'agent'} = __PACKAGE__ . ' ' . $VERSION unless defined $conf{'agent'};
+    $self->{'ua'} = LWP::UserAgent->new(%conf);
+  }
+  $self->{'ua'}->default_header('referer' => $referer);
 
-  $conf{'agent'} = __PACKAGE__ . ' ' . $VERSION unless defined $conf{'agent'};
-  my $ua = LWP::UserAgent->new(%conf);
-  $ua->default_header('referer' => $referer);
-  $self->{'ua'} = $ua;
+  # respect proxy environment variables (reported by IZUT)
+  $self->{'ua'}->env_proxy;
 
   bless $self, $class;
 }
@@ -75,6 +80,18 @@ sub detect {
 
 sub ping {
   return $_[0]->{'ua'}->get(GOOGLE_TRANSLATE_URL)->is_success;
+}
+
+
+
+sub json {
+  return $_[0]->{'json'};
+}
+
+
+
+sub ua {
+  return $_[0]->{'ua'};
 }
 
 
@@ -214,19 +231,21 @@ Creates a new C<WebService::Google::Language> object and returns it.
 Key/value pair arguments set up the initial state:
 
   Key       Usage         Expected value
-  ----------------------------------------------------
+  ---------------------------------------------------------
   referer   mandatory     HTTP referer
   src       optional      default source language
   dest      optional      default destination language
   key       recommended   application's key
+  ua        optional      an LWP::UserAgent object for reuse
+  json      optional      a JSON object for reuse
 
 Since Google demands a "valid and accurate http referer header" in
 requests to their service, a non-empty referer string must be passed
 to the constructor. Otherwise the constructor will fail.
 
-Any additional entries in the C<%options> hash will be passed unmodified
-to the constructor of C<LWP::UserAgent>, which is used for performing
-the requests.
+Unless the key 'ua' contains an instance of C<LWP::UserAgent>, any additional
+entries in the C<%options> hash will be passed unmodified to the constructor
+of C<LWP::UserAgent>, which is used for performing the requests.
 
 E.g. you can set your own user agent identification and specify a timeout
 this way:
@@ -235,6 +254,14 @@ this way:
     'referer' => 'http://example.com/',
     'agent'   => 'My Application 2.0',
     'timeout' => 5,
+  );
+
+Or reuse existing instances of C<LWP::UserAgent> and C<JSON> respectively:
+
+  $service = WebService::Google::Language->new(
+    'referer' => 'http://example.com/',
+    'ua'      => $my_ua_obj,
+    'json'    => $my_json_obj,
   );
 
 =item $service = WebService::Google::Language->new($referer);
@@ -312,6 +339,14 @@ Examples:
   # using the more verbose alias
   $result = $service->detect_language('Hallo Welt');
 
+=item $json = $service->json;
+
+Returns the C<JSON> object used by this instance.
+
+=item $ua = $service->ua;
+
+Returns the C<LWP::UserAgent> object used by this instance.
+
 =back
 
 =head1 RESULT ACCESSOR METHODS
@@ -375,7 +410,12 @@ L<http://code.google.com/apis/ajaxlanguage/documentation/reference.html>
 
 =head1 AUTHOR
 
-Henning Manske (henning.manske@googlemail.com)
+Henning Manske (hma@cpan.org)
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Igor Sutton (IZUT) for submitting a patch to enable the use of
+proxy environment variables within C<LWP::UserAgent>.
 
 =head1 COPYRIGHT AND LICENSE
 

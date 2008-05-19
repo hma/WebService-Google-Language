@@ -6,4 +6,5 @@ README
 lib/WebService/Google/Language.pm
 t/00-load.t
 t/01-constructor.t
-t/02-methods.t
+t/02-accessors.t
+t/03-methods.t
