@@ -3,7 +3,7 @@ package WebService::Google::Language;
 use strict;
 use warnings;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 use Carp;
 use JSON 2.0 ();
@@ -29,23 +29,22 @@ sub new {
   croak "Constructor requires a non-empty parameter 'referer'"
     unless defined $referer and $referer =~ /\S/;
 
-  my $self = {};
+  my $self = { 'referer' => $referer };
   for (qw(src dest key ua json)) {
     if (defined(my $value = delete $conf{$_})) {
       $self->{$_} = $value;
     }
   }
+
   unless (ref $self->{'json'} and $self->{'json'}->isa('JSON')) {
     $self->{'json'} = JSON->new;
   }
   unless (ref $self->{'ua'} and $self->{'ua'}->isa('LWP::UserAgent')) {
     $conf{'agent'} = __PACKAGE__ . ' ' . $VERSION unless defined $conf{'agent'};
     $self->{'ua'} = LWP::UserAgent->new(%conf);
+    # respect proxy environment variables (reported by IZUT)
+    $self->{'ua'}->env_proxy;
   }
-  $self->{'ua'}->default_header('referer' => $referer);
-
-  # respect proxy environment variables (reported by IZUT)
-  $self->{'ua'}->env_proxy;
 
   bless $self, $class;
 }
@@ -79,19 +78,42 @@ sub detect {
 
 
 sub ping {
-  return $_[0]->{'ua'}->get(GOOGLE_TRANSLATE_URL)->is_success;
+  my $self = shift;
+  return $self->{'ua'}
+    ->get(GOOGLE_TRANSLATE_URL, 'referer' => $self->{'referer'})
+    ->is_success;
 }
 
 
 
+#
+#  accessors
+#
+
 sub json {
-  return $_[0]->{'json'};
+  my $self = shift;
+  if (@_) {
+    my $json = shift;
+    croak "Accessor requires an object based on 'JSON'"
+      unless ref $json and $json->isa('JSON');
+    $self->{'json'} = $json;
+    return $self;
+  }
+  $self->{'json'};
 }
 
 
 
 sub ua {
-  return $_[0]->{'ua'};
+  my $self = shift;
+  if (@_) {
+    my $ua = shift;
+    croak "Accessor requires an object based on 'LWP::UserAgent'"
+      unless ref $ua and $ua->isa('LWP::UserAgent');
+    $self->{'ua'} = $ua;
+    return $self;
+  }
+  $self->{'ua'};
 }
 
 
@@ -117,7 +139,8 @@ sub _request {
     . (defined $self->{'key'} ? '&key=' . uri_escape($self->{'key'}) : '')
     . '&q=' . uri_escape($text);
 
-  my $response = $self->{'ua'}->get($uri);
+  my $response = $self->{'ua'}->get($uri, 'referer' => $self->{'referer'});
+
   if ($response->is_success) {
     my $result = eval { $self->{'json'}->decode($response->content) };
     if ($@) {

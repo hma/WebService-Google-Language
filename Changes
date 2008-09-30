@@ -1,5 +1,10 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.03    Sep 30, 2008
+
+        - Accessors can be used as chained mutators
+        - Set HTTP referer header per request
+
 0.02    May 19, 2008
 
         - FIX: respect proxy environment variables (reported by IZUT)
@@ -8,4 +13,5 @@ Revision history for Perl extension WebService::Google::Language
         - JSON and LWP::UserAgent instances can be passed to constructor
 
 0.01    May 16, 2008
+
         - Initial release
