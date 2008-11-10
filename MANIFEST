@@ -8,3 +8,5 @@ t/00-load.t
 t/01-constructor.t
 t/02-accessors.t
 t/03-methods.t
+t/04-pod.t
+t/05-pod-coverage.t

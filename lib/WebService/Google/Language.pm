@@ -3,16 +3,18 @@ package WebService::Google::Language;
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 use Carp;
 use JSON 2.0 ();
 use LWP::UserAgent;
 use URI::Escape;
 
-use constant GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/language/detect?v=1.0';
-use constant GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0';
-use constant MAX_LENGTH => 500;
+use constant {
+  GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/language/detect?v=1.0',
+  GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0',
+  MAX_LENGTH           => 500,
+};
 
 
 
@@ -30,23 +32,29 @@ sub new {
     unless defined $referer and $referer =~ /\S/;
 
   my $self = { 'referer' => $referer };
-  for (qw(src dest key ua json)) {
+  for (qw(src dest key)) {
     if (defined(my $value = delete $conf{$_})) {
       $self->{$_} = $value;
     }
   }
-
-  unless (ref $self->{'json'} and $self->{'json'}->isa('JSON')) {
-    $self->{'json'} = JSON->new;
-  }
-  unless (ref $self->{'ua'} and $self->{'ua'}->isa('LWP::UserAgent')) {
-    $conf{'agent'} = __PACKAGE__ . ' ' . $VERSION unless defined $conf{'agent'};
-    $self->{'ua'} = LWP::UserAgent->new(%conf);
-    # respect proxy environment variables (reported by IZUT)
-    $self->{'ua'}->env_proxy;
-  }
-
   bless $self, $class;
+
+  for (qw(json ua)) {
+    if (defined(my $value = delete $conf{$_})) {
+      $self->$_($value);
+    }
+  }
+  unless ($self->json) {
+    $self->json(JSON->new);
+  }
+  unless ($self->ua) {
+    $conf{'agent'} = $class . ' ' . $VERSION unless defined $conf{'agent'};
+    # respect proxy environment variables (reported by IZUT)
+    $conf{'env_proxy'} = 1 unless exists $conf{'env_proxy'};
+    $self->ua(LWP::UserAgent->new(%conf));
+  }
+
+  return $self;
 }
 
 
@@ -64,8 +72,6 @@ sub translate {
   return $self->_request($args{'text'}, $src . '%7C' . $dest);
 }
 
-
-
 sub detect {
   my $self = shift;
   unshift @_, 'text' if @_ % 2;
@@ -75,11 +81,9 @@ sub detect {
 
 *detect_language = \&detect;
 
-
-
 sub ping {
   my $self = shift;
-  return $self->{'ua'}
+  return $self->ua
     ->get(GOOGLE_TRANSLATE_URL, 'referer' => $self->{'referer'})
     ->is_success;
 }
@@ -101,8 +105,6 @@ sub json {
   }
   $self->{'json'};
 }
-
-
 
 sub ua {
   my $self = shift;
@@ -127,31 +129,31 @@ sub _request {
   if (defined $text and $text =~ /\S/) {
     utf8::encode($text);
     if (length $text > MAX_LENGTH) {
-      croak "Google does not allow submission of text exceeding " . MAX_LENGTH . ' characters in length';
+      croak 'Google does not allow submission of text exceeding ' . MAX_LENGTH . ' characters in length';
     }
   }
   else {
     return;
   }
 
-  my $uri =
+  my $url =
     (defined $langpair ? GOOGLE_TRANSLATE_URL . '&langpair=' . $langpair : GOOGLE_DETECT_URL)
     . (defined $self->{'key'} ? '&key=' . uri_escape($self->{'key'}) : '')
     . '&q=' . uri_escape($text);
 
-  my $response = $self->{'ua'}->get($uri, 'referer' => $self->{'referer'});
+  my $response = $self->ua->get($url, 'referer' => $self->{'referer'});
 
   if ($response->is_success) {
-    my $result = eval { $self->{'json'}->decode($response->content) };
+    my $result = eval { $self->json->decode($response->content) };
     if ($@) {
-      croak "Couldn't parse response from \"$uri\": $@";
+      croak "Couldn't parse response from \"$url\": $@";
     }
     else {
       return bless $result, 'WebService::Google::Language::Result';
     }
   }
   else {
-    croak "An HTTP error occured while getting \"$uri\": " . $response->status_line . "\n";
+    croak "An HTTP error occured while getting \"$url\": " . $response->status_line;
   }
 }
 
@@ -352,6 +354,8 @@ The C<detect> method will request the detection of the language of
 a given text. C<$text> is the single parameter and can be passed directly
 or as key 'text' of a hash.
 
+=item $result = $service->detect_language($text);
+
 If C<detect> as a method name is just not descriptive enough, there is
 an alias C<detect_language> available.
 
@@ -362,13 +366,24 @@ Examples:
   # using the more verbose alias
   $result = $service->detect_language('Hallo Welt');
 
+=item $boolean = $service->ping;
+
+Checks if internet access to Google's service is available.
+
 =item $json = $service->json;
 
 Returns the C<JSON> object used by this instance.
 
+=item $service = $service->json($json);
+
+Sets the C<JSON> object to be used by this instance.
+Setters return their instance and can be chained.
+
 =item $ua = $service->ua;
 
-Returns the C<LWP::UserAgent> object used by this instance.
+=item $service = $service->ua($ua);
+
+Returns/sets the C<LWP::UserAgent> object.
 
 =back
 
@@ -442,10 +457,7 @@ proxy environment variables within C<LWP::UserAgent>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2008 Henning Manske, State and University Library Hamburg.
-All rights reserved.
-
-L<http://www.sub.uni-hamburg.de/>
+Copyright 2008 Henning Manske, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

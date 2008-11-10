@@ -1,5 +1,13 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.04    Nov 10, 2008
+
+        - Use accessors in constructor and methods
+        - Minor code cleanup
+        - Documentation updated about the setting functionality
+          of the accessors and the formerly unmentioned ping method
+        - Test documentation with Test::Pod and Test::Pod::Coverage
+
 0.03    Sep 30, 2008
 
         - Accessors can be used as chained mutators
