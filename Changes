@@ -1,5 +1,12 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.05    Nov 11, 2008
+
+        - FIX: declaring multiple constants at once in 0.04
+          broke compatibility with Perl 5.6 standard distribution
+          (constant.pm < 1.03)
+        - FIX: Latin-1 to UTF-8 bytes conversion was broken on Perl 5.6
+
 0.04    Nov 10, 2008
 
         - Use accessors in constructor and methods

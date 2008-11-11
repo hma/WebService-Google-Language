@@ -3,18 +3,16 @@ package WebService::Google::Language;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Carp;
 use JSON 2.0 ();
 use LWP::UserAgent;
 use URI::Escape;
 
-use constant {
-  GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/language/detect?v=1.0',
-  GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0',
-  MAX_LENGTH           => 500,
-};
+use constant GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/language/detect?v=1.0';
+use constant GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0';
+use constant MAX_LENGTH           => 500;
 
 
 
@@ -121,13 +119,13 @@ sub ua {
 
 
 #
-#  private methods
+#  private methods and functions
 #
 
 sub _request {
   my ($self, $text, $langpair) = @_;
   if (defined $text and $text =~ /\S/) {
-    utf8::encode($text);
+    _utf8_encode($text);
     if (length $text > MAX_LENGTH) {
       croak 'Google does not allow submission of text exceeding ' . MAX_LENGTH . ' characters in length';
     }
@@ -135,7 +133,6 @@ sub _request {
   else {
     return;
   }
-
   my $url =
     (defined $langpair ? GOOGLE_TRANSLATE_URL . '&langpair=' . $langpair : GOOGLE_DETECT_URL)
     . (defined $self->{'key'} ? '&key=' . uri_escape($self->{'key'}) : '')
@@ -154,6 +151,22 @@ sub _request {
   }
   else {
     croak "An HTTP error occured while getting \"$url\": " . $response->status_line;
+  }
+}
+
+sub _utf8_encode {
+  if ($] >= 5.006 and $] < 5.007) {
+
+    # on Perl 5.6 the JSON 2 module (JSON::PP56) provides the missing
+    # utf8::encode function, but it seems to be broken
+    # my own UTF8 encoder ist tested on ActivePerl 5.6.1.638
+
+    if (length $_[0] == do { use bytes; length $_[0] }) {
+      $_[0] = pack 'U*', unpack 'C*', $_[0];
+    }
+  }
+  else {
+    utf8::encode($_[0]);
   }
 }
 
