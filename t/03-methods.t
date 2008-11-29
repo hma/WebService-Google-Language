@@ -1,19 +1,25 @@
-#!perl -Tw
+#!perl -T
 
 use strict;
+use warnings;
 
-use Test::More;
+use Test::More 'tests' => 26;
 
 use WebService::Google::Language;
 
+use constant NO_INTERNET => q{Can't reach Google (no internet access?)};
+
 my $service = WebService::Google::Language->new('referer' => 'http://search.cpan.org/~hma/');
 
-if ($service->ping) {
-  plan 'tests' => 24;
-}
-else {
-  plan 'skip_all' => "Can't reach Google (no internet access?)";
-}
+
+
+#
+#  ping
+#
+
+can_ok $service, 'ping';
+my $internet = $service->ping;
+ok     defined $internet, 'ping returned defined';
 
 
 
@@ -21,10 +27,12 @@ else {
 #  translate
 #
 
-  can_ok $service, 'translate';
-  ok     !defined $service->translate, 'Call to translate without text parameter returned undef';
+can_ok $service, 'translate';
+ok     !defined $service->translate, 'Call to translate without text parameter returned undef';
 
 SKIP: {
+  skip NO_INTERNET, 12 unless $internet;
+
   my $result = eval { $service->translate('Hallo Welt') };
 
   ok     defined $result, 'translate returned something'
@@ -54,11 +62,13 @@ SKIP: {
 #  detect
 #
 
-  can_ok $service, 'detect';
-  can_ok $service, 'detect_language';
-  ok     !defined $service->detect, 'Call to detect without text parameter returned undef';
+can_ok $service, 'detect';
+can_ok $service, 'detect_language';
+ok     !defined $service->detect, 'Call to detect without text parameter returned undef';
 
 SKIP: {
+  skip NO_INTERNET, 7 unless $internet;
+
   my $result = eval { $service->detect('Bonjour tout le monde') };
 
   ok     defined $result, 'detect returned something'
