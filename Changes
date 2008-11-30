@@ -1,5 +1,12 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.07    Nov 30, 2008
+
+        - FIX: if subclassed, constructor extracts version number
+          for default user agent identification from subclass
+        - Minor code cleanup
+        - Added warranty disclaimer to documentation
+
 0.06    Nov 29, 2008
 
         - Improved test suite

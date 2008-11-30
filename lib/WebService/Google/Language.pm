@@ -5,7 +5,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Carp;
 use JSON 2.0 ();
@@ -28,7 +28,7 @@ sub new {
   my %conf = @_;
 
   my $referer = delete $conf{'referer'};
-  croak "Constructor requires a non-empty parameter 'referer'"
+  croak q{Constructor requires a non-empty parameter 'referer'}
     unless defined $referer and $referer =~ /\S/;
 
   my $self = { 'referer' => $referer };
@@ -48,7 +48,13 @@ sub new {
     $self->json(JSON->new);
   }
   unless ($self->ua) {
-    $conf{'agent'} = $class . ' ' . $VERSION unless defined $conf{'agent'};
+    unless (defined $conf{'agent'}) {
+      my $agent = $class;
+      if (defined(my $version = eval '$' . $class . '::VERSION')) {
+        $agent .= ' ' . $version;
+      }
+      $conf{'agent'} = $agent;
+    }
     # respect proxy environment variables (reported by IZUT)
     $conf{'env_proxy'} = 1 unless exists $conf{'env_proxy'};
     $self->ua(LWP::UserAgent->new(%conf));
@@ -98,7 +104,7 @@ sub json {
   my $self = shift;
   if (@_) {
     my $json = shift;
-    croak "Accessor requires an object based on 'JSON'"
+    croak q{Accessor 'json' requires an object based on 'JSON'}
       unless ref $json and $json->isa('JSON');
     $self->{'json'} = $json;
     return $self;
@@ -110,7 +116,7 @@ sub ua {
   my $self = shift;
   if (@_) {
     my $ua = shift;
-    croak "Accessor requires an object based on 'LWP::UserAgent'"
+    croak q{Accessor 'ua' requires an object based on 'LWP::UserAgent'}
       unless ref $ua and $ua->isa('LWP::UserAgent');
     $self->{'ua'} = $ua;
     return $self;
@@ -129,7 +135,8 @@ sub _request {
   if (defined $text and $text =~ /\S/) {
     _utf8_encode($text);
     if (length $text > MAX_LENGTH) {
-      croak 'Google does not allow submission of text exceeding ' . MAX_LENGTH . ' characters in length';
+      croak 'Google does not allow submission of text exceeding '
+        . MAX_LENGTH . ' characters in length';
     }
   }
   else {
@@ -145,19 +152,19 @@ sub _request {
   if ($response->is_success) {
     my $result = eval { $self->json->decode($response->content) };
     if ($@) {
-      croak "Couldn't parse response from \"$url\": $@";
+      croak "Couldn't parse response from '$url': $@";
     }
     else {
       return bless $result, 'WebService::Google::Language::Result';
     }
   }
   else {
-    croak "An HTTP error occured while getting \"$url\": " . $response->status_line;
+    croak "An HTTP error occured while getting '$url': " . $response->status_line;
   }
 }
 
 sub _utf8_encode {
-  if ($] >= 5.006 and $] < 5.007) {
+  if ($] < 5.007) {
 
     # on Perl 5.6 the JSON 2 module (JSON::PP56) provides the missing
     # utf8::encode function, but it seems to be broken
@@ -427,7 +434,7 @@ C<undef> for a result from C<translate> or C<detect> respectively.
   is_reliable   no       yes    reliability of detected language
   confidence    no       yes    confidence level, ranging from 0 to 1.0
 
-The L</"SYNOPSIS"> of this module includes a complete example of using the
+The L<"SYNOPSIS"> of this module includes a complete example of using the
 accessor methods.
 
 =head1 LIMITATIONS
@@ -472,9 +479,15 @@ proxy environment variables within C<LWP::UserAgent>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2008 Henning Manske, all rights reserved.
+Copyright (c) 2008 Henning Manske. All rights reserved.
 
-This program is free software; you can redistribute it and/or modify it
+This module is free software. You can redistribute it and/or modify it
 under the same terms as Perl itself.
+
+See L<http://www.perl.com/perl/misc/Artistic.html>.
+
+This module is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 =cut
