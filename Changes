@@ -1,5 +1,11 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.08    Feb 05, 2009
+
+        - FIX: Increased limitation of text length from 500 to 5000
+          according to the change of Google's Terms of Use
+          (reported by Ilya Rubtsov)
+
 0.07    Nov 30, 2008
 
         - FIX: if subclassed, constructor extracts version number

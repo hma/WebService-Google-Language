@@ -5,7 +5,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use Carp;
 use JSON 2.0 ();
@@ -14,7 +14,7 @@ use URI::Escape;
 
 use constant GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/language/detect?v=1.0';
 use constant GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0';
-use constant MAX_LENGTH           => 500;
+use constant MAX_LENGTH           => 5000;
 
 
 
@@ -168,7 +168,7 @@ sub _utf8_encode {
 
     # on Perl 5.6 the JSON 2 module (JSON::PP56) provides the missing
     # utf8::encode function, but it seems to be broken
-    # my own UTF8 encoder ist tested on ActivePerl 5.6.1.638
+    # my own UTF8 encoder is tested on ActivePerl 5.6.1.638
 
     if (length $_[0] == do { use bytes; length $_[0] }) {
       $_[0] = pack 'U*', unpack 'C*', $_[0];
@@ -439,7 +439,7 @@ accessor methods.
 
 =head1 LIMITATIONS
 
-Google does not allow submission of text exceeding 500 characters in length
+Google does not allow submission of text exceeding 5000 characters in length
 to their service (see Terms of Use). This module will check the length of
 text passed to its methods and will fail if text is too long (without sending
 a request to Google).
@@ -477,9 +477,12 @@ Henning Manske (hma@cpan.org)
 Thanks to Igor Sutton (IZUT) for submitting a patch to enable the use of
 proxy environment variables within C<LWP::UserAgent>.
 
+Thanks to Ilya Rubtsov for pointing out Google's change of the text length
+limitation (see Terms of Use).
+
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2008 Henning Manske. All rights reserved.
+Copyright (c) 2008-2009 Henning Manske. All rights reserved.
 
 This module is free software. You can redistribute it and/or modify it
 under the same terms as Perl itself.
