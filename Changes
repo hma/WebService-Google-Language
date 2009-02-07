@@ -1,8 +1,16 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.09    Feb 07, 2009
+
+        - FIX: changed HTTP request method from GET to POST
+          (when necessary and if possible) because of an existing
+          server-side limitation of the length of the URL
+          (reported by Ilya Rubtsov)
+        - URI::Escape not required directly anymore
+
 0.08    Feb 05, 2009
 
-        - FIX: Increased limitation of text length from 500 to 5000
+        - FIX: increased limitation of text length from 500 to 5000
           according to the change of Google's Terms of Use
           (reported by Ilya Rubtsov)
 

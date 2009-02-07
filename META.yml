@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                WebService-Google-Language
-version:             0.08
+version:             0.09
 abstract:            Perl interface to the Google AJAX Language API
 license:             perl
 author:              
@@ -12,7 +12,6 @@ requires:
     JSON:                          2
     LWP::UserAgent:                0
     Test::More:                    0
-    URI::Escape:                   0
 meta-spec:
     url:     http://module-build.sourceforge.net/META-spec-v1.3.html
     version: 1.3

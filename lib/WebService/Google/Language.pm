@@ -5,16 +5,18 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Carp;
 use JSON 2.0 ();
 use LWP::UserAgent;
-use URI::Escape;
+use URI;
 
-use constant GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/language/detect?v=1.0';
-use constant GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate?v=1.0';
+use constant GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/language/detect';
+use constant GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate';
+use constant API_VERSION          => '1.0';
 use constant MAX_LENGTH           => 5000;
+use constant URL_MAX_LENGTH       => 2072;
 
 
 
@@ -75,7 +77,7 @@ sub translate {
   my %args = @_;
   my $src  = $args{'src'}  || $self->{'src'}  || '';
   my $dest = $args{'dest'} || $self->{'dest'} || 'en';
-  return $self->_request($args{'text'}, $src . '%7C' . $dest);
+  return $self->_request($args{'text'}, $src . '|' . $dest);
 }
 
 sub detect {
@@ -142,24 +144,45 @@ sub _request {
   else {
     return;
   }
-  my $url =
-    (defined $langpair ? GOOGLE_TRANSLATE_URL . '&langpair=' . $langpair : GOOGLE_DETECT_URL)
-    . (defined $self->{'key'} ? '&key=' . uri_escape($self->{'key'}) : '')
-    . '&q=' . uri_escape($text);
 
-  my $response = $self->ua->get($url, 'referer' => $self->{'referer'});
+  my ($uri, $response);
+  my @param = ( 'v' => API_VERSION );
+  push @param, 'key' => $self->{'key'} if defined $self->{'key'};
+  if (defined $langpair) {
+    $uri = URI->new(GOOGLE_TRANSLATE_URL);
+    push @param, 'langpair' => $langpair;
+  }
+  else {
+    $uri = URI->new(GOOGLE_DETECT_URL);
+  }
+  push @param, 'q' => $text;
+  $uri->query_form(\@param);
+
+  if ((my $length = length $uri->as_string) > URL_MAX_LENGTH) {
+    if (defined $langpair) {
+      $uri->query_form( [] );
+      $response = $self->ua->post($uri, \@param, 'referer' => $self->{'referer'});
+    }
+    else {
+      croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of "
+        . URL_MAX_LENGTH . ' bytes. Shorten your parameters.';
+    }
+  }
+  else {
+    $response = $self->ua->get($uri, 'referer' => $self->{'referer'});
+  }
 
   if ($response->is_success) {
     my $result = eval { $self->json->decode($response->content) };
     if ($@) {
-      croak "Couldn't parse response from '$url': $@";
+      croak "Couldn't parse response from '$uri': $@";
     }
     else {
       return bless $result, 'WebService::Google::Language::Result';
     }
   }
   else {
-    croak "An HTTP error occured while getting '$url': " . $response->status_line;
+    croak "An HTTP error occured while getting '$uri': " . $response->status_line;
   }
 }
 
@@ -444,6 +467,22 @@ to their service (see Terms of Use). This module will check the length of
 text passed to its methods and will fail if text is too long (without sending
 a request to Google).
 
+=head1 TODO
+
+=over 4
+
+=item * Batch Interface
+
+Incorporate the Batch Interface into this module
+(L<http://code.google.com/apis/ajaxlanguage/documentation/reference.html#_batch_interface>).
+
+=item * Documentation
+
+Explain the server-side length limitation of URLs for GET requests
+which (currently) must be used by the C<detect> method.
+
+=back
+
 =head1 SEE ALSO
 
 =over 4
@@ -478,7 +517,8 @@ Thanks to Igor Sutton (IZUT) for submitting a patch to enable the use of
 proxy environment variables within C<LWP::UserAgent>.
 
 Thanks to Ilya Rubtsov for pointing out Google's change of the text length
-limitation (see Terms of Use).
+limitation (see Terms of Use) and the existing server-side length limitation
+of URLs when using GET request method.
 
 =head1 COPYRIGHT AND LICENSE
 
