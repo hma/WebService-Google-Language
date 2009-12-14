@@ -1,17 +1,26 @@
 --- #YAML:1.0
-name:                WebService-Google-Language
-version:             0.09
-abstract:            Perl interface to the Google AJAX Language API
-license:             perl
-author:              
+name:               WebService-Google-Language
+version:            0.10
+abstract:           Perl interface to the Google AJAX Language API
+author:
     - Henning Manske <hma@cpan.org>
-generated_by:        ExtUtils::MakeMaker version 6.42
-distribution_type:   module
-requires:     
-    Carp:                          0
-    JSON:                          2
-    LWP::UserAgent:                0
-    Test::More:                    0
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    ExtUtils::MakeMaker:  0
+requires:
+    Carp:            0
+    JSON:            2
+    LWP::UserAgent:  0
+    Test::More:      0
+    URI:             0
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.55_02
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

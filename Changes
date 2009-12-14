@@ -1,5 +1,13 @@
 Revision history for Perl extension WebService::Google::Language
 
+0.10    Dec 14, 2009
+
+        - FIX to test suite: 'is_reliable' test started failing due to
+          a change in Google's response. Longer string for language
+          detection provided. To prevent future failures, also changed
+          the test from relying on truth to just checking definedness.
+          (RT #52676, reported by Alan Weir)
+
 0.09    Feb 07, 2009
 
         - FIX: changed HTTP request method from GET to POST

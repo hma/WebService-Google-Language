@@ -69,7 +69,7 @@ ok     !defined $service->detect, 'Call to detect without text parameter returne
 SKIP: {
   skip NO_INTERNET, 7 unless $internet;
 
-  my $result = eval { $service->detect('Bonjour tout le monde') };
+  my $result = eval { $service->detect( q{Bonjour tout le monde! Comment allez-vous aujourd'hui?} ) };
 
   ok     defined $result, 'detect returned something'
            or skip 'no result (detect failed)', 6;
@@ -78,6 +78,6 @@ SKIP: {
            or skip 'result misses some methods', 4;
   ok     !$result->error, 'Google could handle detect request';
   is     $result->language, 'fr', 'Detected language is correct';
-  ok     $result->is_reliable, 'Detected language is reliable';
+  ok     defined $result->is_reliable, 'Detected language has defined reliability';
   ok     $result->confidence > 0.1, 'There is enough confidence';
 }
