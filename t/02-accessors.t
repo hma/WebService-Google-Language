@@ -3,14 +3,14 @@
 use strict;
 use warnings;
 
-use Test::More 'tests' => 16;
+use Test::More tests => 16;
 
 use JSON 2.0 ();
 use LWP::UserAgent;
 
 use WebService::Google::Language;
 
-my $service = WebService::Google::Language->new('referer' => 'http://search.cpan.org/~hma/');
+my $service = WebService::Google::Language->new( referer => 'http://search.cpan.org/~hma/' );
 my ($set, $obj, $gotten);
 
 

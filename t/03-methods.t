@@ -3,13 +3,13 @@
 use strict;
 use warnings;
 
-use Test::More 'tests' => 26;
+use Test::More tests => 26;
 
 use WebService::Google::Language;
 
 use constant NO_INTERNET => q{Can't reach Google (no internet access?)};
 
-my $service = WebService::Google::Language->new('referer' => 'http://search.cpan.org/~hma/');
+my $service = WebService::Google::Language->new( referer => 'http://search.cpan.org/~hma/' );
 
 
 
@@ -44,7 +44,7 @@ SKIP: {
   is     lc $result->translation, 'hello world', 'Translation is correct';
   is     $result->language, 'de', 'Detected language is correct';
 
-  $result = eval { $service->translate('Hallo Welt', 'src' => 'xx') };
+  $result = eval { $service->translate('Hallo Welt', src => 'xx') };
 
   ok     defined $result, 'translate returned something'
            or skip 'no result (translate failed)', 5;

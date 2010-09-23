@@ -1,4 +1,8 @@
-Revision history for Perl extension WebService::Google::Language
+Revision history for Perl extension WebService-Google-Language
+
+0.11_01 Sep 23, 2010
+
+        - Modernized distribution (no functional changes)
 
 0.10    Dec 14, 2009
 

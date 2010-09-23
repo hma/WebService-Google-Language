@@ -5,7 +5,9 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11_01';
+
+$VERSION = eval $VERSION;
 
 use Carp;
 use JSON 2.0 ();
@@ -29,11 +31,11 @@ sub new {
   unshift @_, 'referer' if @_ % 2;
   my %conf = @_;
 
-  my $referer = delete $conf{'referer'};
+  my $referer = delete $conf{referer};
   croak q{Constructor requires a non-empty parameter 'referer'}
     unless defined $referer and $referer =~ /\S/;
 
-  my $self = { 'referer' => $referer };
+  my $self = { referer => $referer };
   for (qw(src dest key)) {
     if (defined(my $value = delete $conf{$_})) {
       $self->{$_} = $value;
@@ -50,15 +52,15 @@ sub new {
     $self->json(JSON->new);
   }
   unless ($self->ua) {
-    unless (defined $conf{'agent'}) {
+    unless (defined $conf{agent}) {
       my $agent = $class;
       if (defined(my $version = eval '$' . $class . '::VERSION')) {
         $agent .= ' ' . $version;
       }
-      $conf{'agent'} = $agent;
+      $conf{agent} = $agent;
     }
     # respect proxy environment variables (reported by IZUT)
-    $conf{'env_proxy'} = 1 unless exists $conf{'env_proxy'};
+    $conf{env_proxy} = 1 unless exists $conf{env_proxy};
     $self->ua(LWP::UserAgent->new(%conf));
   }
 
@@ -75,16 +77,16 @@ sub translate {
   my $self = shift;
   unshift @_, 'text' if @_ % 2;
   my %args = @_;
-  my $src  = $args{'src'}  || $self->{'src'}  || '';
-  my $dest = $args{'dest'} || $self->{'dest'} || 'en';
-  return $self->_request($args{'text'}, $src . '|' . $dest);
+  my $src  = $args{src}  || $self->{src}  || '';
+  my $dest = $args{dest} || $self->{dest} || 'en';
+  return $self->_request($args{text}, $src . '|' . $dest);
 }
 
 sub detect {
   my $self = shift;
   unshift @_, 'text' if @_ % 2;
   my %args = @_;
-  return $self->_request($args{'text'});
+  return $self->_request($args{text});
 }
 
 *detect_language = \&detect;
@@ -92,7 +94,7 @@ sub detect {
 sub ping {
   my $self = shift;
   return $self->ua
-    ->get(GOOGLE_TRANSLATE_URL, 'referer' => $self->{'referer'})
+    ->get( GOOGLE_TRANSLATE_URL, referer => $self->{referer} )
     ->is_success;
 }
 
@@ -108,10 +110,10 @@ sub json {
     my $json = shift;
     croak q{Accessor 'json' requires an object based on 'JSON'}
       unless ref $json and $json->isa('JSON');
-    $self->{'json'} = $json;
+    $self->{json} = $json;
     return $self;
   }
-  $self->{'json'};
+  $self->{json};
 }
 
 sub ua {
@@ -120,10 +122,10 @@ sub ua {
     my $ua = shift;
     croak q{Accessor 'ua' requires an object based on 'LWP::UserAgent'}
       unless ref $ua and $ua->isa('LWP::UserAgent');
-    $self->{'ua'} = $ua;
+    $self->{ua} = $ua;
     return $self;
   }
-  $self->{'ua'};
+  $self->{ua};
 }
 
 
@@ -146,22 +148,22 @@ sub _request {
   }
 
   my ($uri, $response);
-  my @param = ( 'v' => API_VERSION );
-  push @param, 'key' => $self->{'key'} if defined $self->{'key'};
+  my @param = ( v => API_VERSION );
+  push @param, key => $self->{key} if defined $self->{key};
   if (defined $langpair) {
     $uri = URI->new(GOOGLE_TRANSLATE_URL);
-    push @param, 'langpair' => $langpair;
+    push @param, langpair => $langpair;
   }
   else {
     $uri = URI->new(GOOGLE_DETECT_URL);
   }
-  push @param, 'q' => $text;
+  push @param, q => $text;
   $uri->query_form(\@param);
 
   if ((my $length = length $uri->as_string) > URL_MAX_LENGTH) {
     if (defined $langpair) {
       $uri->query_form( [] );
-      $response = $self->ua->post($uri, \@param, 'referer' => $self->{'referer'});
+      $response = $self->ua->post( $uri, \@param, referer => $self->{referer} );
     }
     else {
       croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of "
@@ -169,7 +171,7 @@ sub _request {
     }
   }
   else {
-    $response = $self->ua->get($uri, 'referer' => $self->{'referer'});
+    $response = $self->ua->get( $uri, referer => $self->{referer} );
   }
 
   if ($response->is_success) {
@@ -211,39 +213,39 @@ sub _utf8_encode {
 package WebService::Google::Language::Result;
 
 sub error {
-  $_[0]->{'responseStatus'} != 200
-    ? { 'code'    => $_[0]->{'responseStatus'},
-        'message' => $_[0]->{'responseDetails'},
+  $_[0]->{responseStatus} != 200
+    ? { code    => $_[0]->{responseStatus},
+        message => $_[0]->{responseDetails},
       }
     : undef
 }
 
-sub code { $_[0]->{'responseStatus'} }
+sub code { $_[0]->{responseStatus} }
 
-sub message { $_[0]->{'responseDetails'} }
+sub message { $_[0]->{responseDetails} }
 
 sub translation {
-  defined $_[0]->{'responseData'}
-    ? $_[0]->{'responseData'}{'translatedText'}
+  defined $_[0]->{responseData}
+    ? $_[0]->{responseData}{translatedText}
     : undef
 }
 
 sub language {
-  defined $_[0]->{'responseData'}
-    ? $_[0]->{'responseData'}{'language'} ||
-      $_[0]->{'responseData'}{'detectedSourceLanguage'}
+  defined $_[0]->{responseData}
+    ? $_[0]->{responseData}{language} ||
+      $_[0]->{responseData}{detectedSourceLanguage}
     : undef
 }
 
 sub is_reliable {
-  defined $_[0]->{'responseData'}
-    ? $_[0]->{'responseData'}{'isReliable'}
+  defined $_[0]->{responseData}
+    ? $_[0]->{responseData}{isReliable}
     : undef
 }
 
 sub confidence {
-  defined $_[0]->{'responseData'}
-    ? $_[0]->{'responseData'}{'confidence'}
+  defined $_[0]->{responseData}
+    ? $_[0]->{responseData}{confidence}
     : undef
 }
 
@@ -261,13 +263,13 @@ WebService::Google::Language - Perl interface to the Google AJAX Language API
 
   use WebService::Google::Language;
 
-  $service = WebService::Google::Language->new(
-    'referer' => 'http://example.com/',
-    'src'     => '',
-    'dest'    => 'en',
+  my $service = WebService::Google::Language->new(
+    referer => 'http://example.com/',
+    src     => '',
+    dest    => 'en',
   );
 
-  $result = $service->translate('Hallo Welt');
+  my $result = $service->translate('Hallo Welt');
   if ($result->error) {
     printf "Error code: %s\n", $result->code;
     printf "Message:    %s\n", $result->message;
@@ -321,17 +323,17 @@ E.g. you can set your own user agent identification and specify a timeout
 this way:
 
   $service = WebService::Google::Language->new(
-    'referer' => 'http://example.com/',
-    'agent'   => 'My Application 2.0',
-    'timeout' => 5,
+    referer => 'http://example.com/',
+    agent   => 'My Application 2.0',
+    timeout => 5,
   );
 
 Or reuse existing instances of C<LWP::UserAgent> and C<JSON> respectively:
 
   $service = WebService::Google::Language->new(
-    'referer' => 'http://example.com/',
-    'ua'      => $my_ua_obj,
-    'json'    => $my_json_obj,
+    referer => 'http://example.com/',
+    ua      => $my_ua_obj,
+    json    => $my_json_obj,
   );
 
 =item $service = WebService::Google::Language->new($referer);
@@ -378,13 +380,13 @@ Examples:
   $result = $service->translate('Hallo Welt');
 
   # auto-detect source language and translate to French (fr)
-  $result = $service->translate('Hallo Welt', 'dest' => 'fr');
+  $result = $service->translate( 'Hallo Welt', dest => 'fr' );
 
   # set source to English and destination to German (de)
   %args = (
-    'text' => 'Hello world',
-    'src'  => 'en',
-    'dest' => 'de',
+    text => 'Hello world',
+    src  => 'en',
+    dest => 'de',
   );
   $result = $service->translate(%args);
 
@@ -393,7 +395,7 @@ and valid language translation pairs.
 
 =item $result = $service->detect($text);
 
-=item $result = $service->detect('text' => $text);
+=item $result = $service->detect( text => $text );
 
 The C<detect> method will request the detection of the language of
 a given text. C<$text> is the single parameter and can be passed directly
@@ -509,7 +511,7 @@ L<http://code.google.com/apis/ajaxlanguage/documentation/reference.html>
 
 =head1 AUTHOR
 
-Henning Manske (hma@cpan.org)
+Henning Manske <hma@cpan.org>
 
 =head1 ACKNOWLEDGEMENTS
 
@@ -522,12 +524,13 @@ of URLs when using GET request method.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2008-2009 Henning Manske. All rights reserved.
+Copyright (c) 2008-2010 Henning Manske. All rights reserved.
 
 This module is free software. You can redistribute it and/or modify it
-under the same terms as Perl itself.
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
 
-See L<http://www.perl.com/perl/misc/Artistic.html>.
+See L<http://dev.perl.org/licenses/>.
 
 This module is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
