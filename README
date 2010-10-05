@@ -51,6 +51,7 @@ This module requires these other modules:
     JSON 2.0+
     LWP::UserAgent
     Test::More 0.62+    (required by "make test")
+    URI
 
 
 DOCUMENTATION
