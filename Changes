@@ -1,7 +1,8 @@
 Revision history for Perl extension WebService-Google-Language
 
-0.11_01 Sep 23, 2010
+0.11_01 Oct 06, 2010
 
+        - CPAN developer release
         - Modernized distribution (no functional changes)
 
 0.10    Dec 14, 2009
