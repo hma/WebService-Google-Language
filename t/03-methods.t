@@ -38,7 +38,7 @@ SKIP: {
   ok     defined $result, 'translate returned something'
            or skip 'no result (translate failed)', 11;
   isa_ok $result, 'WebService::Google::Language::Result';
-  can_ok $result, qw(error translation language)
+  can_ok $result, qw'error translation language'
            or skip 'result misses some methods', 9;
   ok     !$result->error, 'Google could handle translate request';
   is     lc $result->translation, 'hello world', 'Translation is correct';
@@ -49,7 +49,7 @@ SKIP: {
   ok     defined $result, 'translate returned something'
            or skip 'no result (translate failed)', 5;
   isa_ok $result, 'WebService::Google::Language::Result';
-  can_ok $result, qw(error code message)
+  can_ok $result, qw'error code message'
            or skip 'result misses some methods', 3;
   ok     $result->error, 'Google returned an error as expected';
   isnt   $result->code, 200, 'Returned code indicates an error';
@@ -74,7 +74,7 @@ SKIP: {
   ok     defined $result, 'detect returned something'
            or skip 'no result (detect failed)', 6;
   isa_ok $result, 'WebService::Google::Language::Result';
-  can_ok $result, qw(error language is_reliable confidence)
+  can_ok $result, qw'error language is_reliable confidence'
            or skip 'result misses some methods', 4;
   ok     !$result->error, 'Google could handle detect request';
   is     $result->language, 'fr', 'Detected language is correct';

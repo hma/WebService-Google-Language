@@ -5,7 +5,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.11_01';
+our $VERSION = '0.12';
 
 $VERSION = eval $VERSION;
 
@@ -36,14 +36,14 @@ sub new {
     unless defined $referer and $referer =~ /\S/;
 
   my $self = { referer => $referer };
-  for (qw(src dest key)) {
+  for (qw'src dest key') {
     if (defined(my $value = delete $conf{$_})) {
       $self->{$_} = $value;
     }
   }
   bless $self, $class;
 
-  for (qw(json ua)) {
+  for (qw'json ua') {
     if (defined(my $value = delete $conf{$_})) {
       $self->$_($value);
     }
