@@ -1,8 +1,9 @@
 Revision history for Perl extension WebService-Google-Language
 
-0.12_01 Dec 11, 2010
+0.12_01 Dec 17, 2010
 
         - Switch GitHub URL to https
+        - Explicitly require Test::More 0.62 in tests
 
 0.12    Oct 10, 2010
 

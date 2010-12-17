@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 2;
+use Test::More 0.62 tests => 2;
 
 use WebService::Google::Language;
 
