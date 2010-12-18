@@ -10,35 +10,51 @@ use LWP::UserAgent;
 
 use WebService::Google::Language;
 
+use constant REFERER => 'http://example.com/';
+
 my %accessors = (
-  json => 'JSON',
-  ua   => 'LWP::UserAgent',
+  json    => JSON->new,
+  ua      => LWP::UserAgent->new,
+  referer => REFERER,
 );
 
 plan tests => 8 * keys %accessors;
 
-my $service = WebService::Google::Language->new( referer => 'http://example.com/' );
-my $error   = qr'requires an object based on';
-my ($set, $obj, $gotten);
+my $service = WebService::Google::Language->new( referer => REFERER );
+my $error   = qr/Accessor '[a-z]+' requires/;
 
 for my $accessor (sort keys %accessors) {
 
   can_ok $service, $accessor;
 
-  # check if constructor has auto-generated the object
-  isa_ok $service->$accessor, my $class = $accessors{$accessor};
-
-  eval { $service->$accessor('foo') };
-  like   $@, $error, "$accessor (setter) failed as expected due to invalid parameter";
   eval { $service->$accessor(undef) };
   like   $@, $error, "$accessor (setter) can't undef";
 
-  $set = $class->new;
-  $obj = $service->$accessor($set);
-  ok     defined $obj,   "$accessor (setter) returned something";
-  is     $obj, $service, "$accessor can be chained";
+  my $thing = $accessors{$accessor};
+  my ($correct, $corrupt);
 
-  $gotten = $service->$accessor;
+  if (my $class = ref $thing) {
+    $correct = $thing;
+    $corrupt = 'foo';
+
+    # check if constructor has auto-generated the object
+    isa_ok $service->$accessor, $class;
+  }
+  else {
+    $correct = 'http://search.cpan.org/dist/WebService-Google-Language/';
+    $corrupt = ' ';
+
+    is   $service->$accessor, $thing, "$accessor (getter) returned value from construction";
+  }
+
+  eval { $service->$accessor($corrupt) };
+  like   $@, $error, "$accessor (setter) failed as expected due to invalid parameter";
+
+  my $value = $service->$accessor($correct);
+  ok     defined $value,   "$accessor (setter) returned something";
+  is     $value, $service, "$accessor can be chained";
+
+  my $gotten = $service->$accessor;
   ok     defined $gotten, "$accessor (getter) returned something";
-  is     $gotten, $set,   "$accessor returned initial object";
+  is     $gotten, $correct, "$accessor returned given value";
 }

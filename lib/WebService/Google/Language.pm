@@ -28,20 +28,18 @@ use constant URL_MAX_LENGTH       => 2072;
 
 sub new {
   my $class = shift;
+  my $self = bless {}, $class;
+
   unshift @_, 'referer' if @_ % 2;
   my %conf = @_;
 
-  my $referer = delete $conf{referer};
-  croak q{Constructor requires a non-empty parameter 'referer'}
-    unless defined $referer and $referer =~ /\S/;
+  $self->referer(delete $conf{referer});
 
-  my $self = { referer => $referer };
   for (qw'src dest key') {
     if (defined(my $value = delete $conf{$_})) {
       $self->{$_} = $value;
     }
   }
-  bless $self, $class;
 
   for (qw'json ua') {
     if (defined(my $value = delete $conf{$_})) {
@@ -94,7 +92,7 @@ sub detect {
 sub ping {
   my $self = shift;
   return $self->ua
-    ->get( GOOGLE_TRANSLATE_URL, referer => $self->{referer} )
+    ->get( GOOGLE_TRANSLATE_URL, referer => $self->referer )
     ->is_success;
 }
 
@@ -114,6 +112,24 @@ sub json {
     return $self;
   }
   $self->{json};
+}
+
+sub referer {
+  my $self = shift;
+  if (@_) {
+    my $referer = shift;
+    unless (defined $referer && $referer =~ /\S/) {
+      my $name    = q{'referer'};
+      my $error   = 'requires a non-empty parameter';
+      my $caller  = (caller(1))[3];
+      croak $caller && $caller eq ref($self) . '::new'
+        ? "Constructor $error $name"
+        : "Accessor $name $error";
+    }
+    $self->{referer} = $referer;
+    return $self;
+  }
+  $self->{referer};
 }
 
 sub ua {
@@ -163,7 +179,7 @@ sub _request {
   if ((my $length = length $uri->as_string) > URL_MAX_LENGTH) {
     if (defined $langpair) {
       $uri->query_form( [] );
-      $response = $self->ua->post( $uri, \@param, referer => $self->{referer} );
+      $response = $self->ua->post( $uri, \@param, referer => $self->referer );
     }
     else {
       croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of "
@@ -171,7 +187,7 @@ sub _request {
     }
   }
   else {
-    $response = $self->ua->get( $uri, referer => $self->{referer} );
+    $response = $self->ua->get( $uri, referer => $self->referer );
   }
 
   if ($response->is_success) {
@@ -431,6 +447,12 @@ Setters return their instance and can be chained.
 =item $service = $service->ua($ua);
 
 Returns/sets the C<LWP::UserAgent> object.
+
+=item $referer = $service->referer;
+
+=item $service = $service->referer($referer);
+
+Returns/sets the referer string.
 
 =back
 
