@@ -50,15 +50,11 @@ sub new {
     $self->json(JSON->new);
   }
   unless ($self->ua) {
-    unless (defined $conf{agent}) {
-      my $agent = $class;
-      if (defined(my $version = eval '$' . $class . '::VERSION')) {
-        $agent .= ' ' . $version;
-      }
-      $conf{agent} = $agent;
-    }
+    $conf{agent} = $class . ' ' . $class->VERSION
+      unless defined $conf{agent};
     # respect proxy environment variables (reported by IZUT)
-    $conf{env_proxy} = 1 unless exists $conf{env_proxy};
+    $conf{env_proxy} = 1
+      unless exists $conf{env_proxy};
     $self->ua(LWP::UserAgent->new(%conf));
   }
 

@@ -5,6 +5,7 @@ Revision history for Perl extension WebService-Google-Language
         - Switch GitHub URL to https
         - Explicitly require Test::More 0.62 in tests
         - Accessor for referer string
+        - More test coverage
 
 0.12    Oct 10, 2010
 

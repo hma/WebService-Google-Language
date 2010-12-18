@@ -18,7 +18,7 @@ my %accessors = (
   referer => REFERER,
 );
 
-plan tests => 8 * keys %accessors;
+plan tests => 9 * keys %accessors;
 
 my $service = WebService::Google::Language->new( referer => REFERER );
 
@@ -56,4 +56,10 @@ for my $accessor (sort keys %accessors) {
   my $gotten = $service->$accessor;
   ok     defined $gotten, "$accessor (getter) returned something";
   is     $gotten, $correct, "$accessor returned given value";
+
+  $gotten = WebService::Google::Language->new(
+    $accessor ne 'referer' ? REFERER : (),
+    $accessor => $correct
+  )->$accessor;
+  is     $gotten, $correct, "$accessor as parameter to constructor";
 }
