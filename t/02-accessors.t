@@ -17,7 +17,7 @@ my %accessors = (
 
 plan tests => 8 * keys %accessors;
 
-my $service = WebService::Google::Language->new( referer => 'http://search.cpan.org/~hma/' );
+my $service = WebService::Google::Language->new( referer => 'http://example.com/' );
 my $error   = qr'requires an object based on';
 my ($set, $obj, $gotten);
 
