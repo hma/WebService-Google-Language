@@ -9,7 +9,7 @@ our $VERSION = '0.12_01';
 
 $VERSION = eval $VERSION;
 
-use Carp;
+use Carp ();
 use JSON 2.0 ();
 use LWP::UserAgent;
 use URI;
@@ -106,7 +106,7 @@ sub json {
   my $self = shift;
   if (@_) {
     my $json = shift;
-    croak q{'json' requires an object based on 'JSON'}
+    Carp::croak q{'json' requires an object based on 'JSON'}
       unless $json && $json->isa('JSON');
     $self->{json} = $json;
     return $self;
@@ -122,7 +122,7 @@ sub referer {
       my $name    = q{'referer'};
       my $error   = 'requires a non-empty parameter';
       my $caller  = (caller(1))[3];
-      croak $caller && $caller eq ref($self) . '::new'
+      Carp::croak $caller && $caller eq ref($self) . '::new'
         ? "Constructor $error $name"
         : "$name $error";
     }
@@ -136,7 +136,7 @@ sub ua {
   my $self = shift;
   if (@_) {
     my $ua = shift;
-    croak q{'ua' requires an object based on 'LWP::UserAgent'}
+    Carp::croak q{'ua' requires an object based on 'LWP::UserAgent'}
       unless $ua && $ua->isa('LWP::UserAgent');
     $self->{ua} = $ua;
     return $self;
@@ -155,7 +155,7 @@ sub _request {
   if (defined $text and $text =~ /\S/) {
     _utf8_encode($text);
     if (length $text > MAX_LENGTH) {
-      croak 'Google does not allow submission of text exceeding '
+      Carp::croak 'Google does not allow submission of text exceeding '
         . MAX_LENGTH . ' characters in length';
     }
   }
@@ -182,7 +182,7 @@ sub _request {
       $response = $self->ua->post( $uri, \@param, referer => $self->referer );
     }
     else {
-      croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of "
+      Carp::croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of "
         . URL_MAX_LENGTH . ' bytes. Shorten your parameters.';
     }
   }
@@ -193,14 +193,14 @@ sub _request {
   if ($response->is_success) {
     my $result = eval { $self->json->decode($response->content) };
     if ($@) {
-      croak "Couldn't parse response from '$uri': $@";
+      Carp::croak "Couldn't parse response from '$uri': $@";
     }
     else {
       return bless $result, 'WebService::Google::Language::Result';
     }
   }
   else {
-    croak "An HTTP error occured while getting '$uri': " . $response->status_line;
+    Carp::croak "An HTTP error occured while getting '$uri': " . $response->status_line;
   }
 }
 
