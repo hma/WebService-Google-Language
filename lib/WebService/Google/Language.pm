@@ -109,7 +109,7 @@ sub json {
   if (@_) {
     my $json = shift;
     croak q{Accessor 'json' requires an object based on 'JSON'}
-      unless ref $json and $json->isa('JSON');
+      unless $json && $json->isa('JSON');
     $self->{json} = $json;
     return $self;
   }
@@ -121,7 +121,7 @@ sub ua {
   if (@_) {
     my $ua = shift;
     croak q{Accessor 'ua' requires an object based on 'LWP::UserAgent'}
-      unless ref $ua and $ua->isa('LWP::UserAgent');
+      unless $ua && $ua->isa('LWP::UserAgent');
     $self->{ua} = $ua;
     return $self;
   }
