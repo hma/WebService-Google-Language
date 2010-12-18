@@ -8,8 +8,9 @@ use Test::More tests => 26;
 use WebService::Google::Language;
 
 use constant NO_INTERNET => q{Can't reach Google (no internet access?)};
+use constant REFERER     => 'http://search.cpan.org/dist/WebService-Google-Language/';
 
-my $service = WebService::Google::Language->new( referer => 'http://search.cpan.org/~hma/' );
+my $service = WebService::Google::Language->new( referer => REFERER );
 
 
 
