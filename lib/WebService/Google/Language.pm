@@ -106,7 +106,7 @@ sub json {
   my $self = shift;
   if (@_) {
     my $json = shift;
-    croak q{Accessor 'json' requires an object based on 'JSON'}
+    croak q{'json' requires an object based on 'JSON'}
       unless $json && $json->isa('JSON');
     $self->{json} = $json;
     return $self;
@@ -124,7 +124,7 @@ sub referer {
       my $caller  = (caller(1))[3];
       croak $caller && $caller eq ref($self) . '::new'
         ? "Constructor $error $name"
-        : "Accessor $name $error";
+        : "$name $error";
     }
     $self->{referer} = $referer;
     return $self;
@@ -136,7 +136,7 @@ sub ua {
   my $self = shift;
   if (@_) {
     my $ua = shift;
-    croak q{Accessor 'ua' requires an object based on 'LWP::UserAgent'}
+    croak q{'ua' requires an object based on 'LWP::UserAgent'}
       unless $ua && $ua->isa('LWP::UserAgent');
     $self->{ua} = $ua;
     return $self;

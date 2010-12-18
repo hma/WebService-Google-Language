@@ -21,12 +21,11 @@ my %accessors = (
 plan tests => 8 * keys %accessors;
 
 my $service = WebService::Google::Language->new( referer => REFERER );
-my $error   = qr/Accessor '[a-z]+' requires/;
 
 for my $accessor (sort keys %accessors) {
-
   can_ok $service, $accessor;
 
+  my $error = qr/'$accessor' requires/;
   eval { $service->$accessor(undef) };
   like   $@, $error, "$accessor (setter) can't undef";
 
