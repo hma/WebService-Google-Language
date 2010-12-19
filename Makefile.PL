@@ -42,6 +42,7 @@ my %args = (
   ( $knows_configure_requires ? ( CONFIGURE_REQUIRES => { 'ExtUtils::MakeMaker' => '6.17' } ) : () ),
 
   BUILD_REQUIRES => {
+    'HTTP::Response' => '0',
     'JSON'           => '2.0',
     'LWP::UserAgent' => '0',
     'Test::More'     => '0.62',
