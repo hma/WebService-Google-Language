@@ -148,7 +148,7 @@ sub ua {
 
 sub _request {
   my ($self, $text, $langpair) = @_;
-  if (defined $text and $text =~ /\S/) {
+  if (defined $text && $text =~ /\S/) {
     _utf8_encode($text);
     if (length $text > MAX_LENGTH) {
       Carp::croak 'Google does not allow submission of text exceeding '
@@ -225,7 +225,7 @@ sub _utf8_encode {
 package WebService::Google::Language::Result;
 
 sub error {
-  $_[0]->{responseStatus} != 200
+  $_[0]->{responseStatus} && $_[0]->{responseStatus} != 200
     ? { code    => $_[0]->{responseStatus},
         message => $_[0]->{responseDetails},
       }
@@ -237,28 +237,22 @@ sub code { $_[0]->{responseStatus} }
 sub message { $_[0]->{responseDetails} }
 
 sub translation {
-  defined $_[0]->{responseData}
-    ? $_[0]->{responseData}{translatedText}
-    : undef
+  $_[0]->{responseData} ? $_[0]->{responseData}{translatedText} : undef
 }
 
 sub language {
-  defined $_[0]->{responseData}
+  $_[0]->{responseData}
     ? $_[0]->{responseData}{language} ||
       $_[0]->{responseData}{detectedSourceLanguage}
     : undef
 }
 
 sub is_reliable {
-  defined $_[0]->{responseData}
-    ? $_[0]->{responseData}{isReliable}
-    : undef
+  $_[0]->{responseData} ? $_[0]->{responseData}{isReliable} : undef
 }
 
 sub confidence {
-  defined $_[0]->{responseData}
-    ? $_[0]->{responseData}{confidence}
-    : undef
+  $_[0]->{responseData} ? $_[0]->{responseData}{confidence} : undef
 }
 
 
