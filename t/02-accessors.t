@@ -18,7 +18,7 @@ my %accessors = (
   referer => REFERER,
 );
 
-plan tests => 9 * keys %accessors;
+plan tests => (9 * keys %accessors) + 1;
 
 my $service = WebService::Google::Language->new( referer => REFERER );
 
@@ -62,4 +62,14 @@ for my $accessor (sort keys %accessors) {
     $accessor => $correct
   )->$accessor;
   is     $gotten, $correct, "$accessor as parameter to constructor";
+}
+
+{
+  my $error;
+
+  no warnings 'redefine';
+  local *Carp::croak = sub { $error = shift };
+
+  $service->referer(undef);
+  like $error, qr/'referer' requires/, 'referer (setter) error outside eval';
 }
