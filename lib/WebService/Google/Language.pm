@@ -172,7 +172,8 @@ sub _request {
   push @param, q => $text;
   $uri->query_form(\@param);
 
-  if ((my $length = length $uri->as_string) > URL_MAX_LENGTH) {
+  my $length = length $uri;
+  if ($length > URL_MAX_LENGTH) {
     if (defined $langpair) {
       $uri->query_form( [] );
       $response = $self->ua->post( $uri, \@param, referer => $self->referer );
