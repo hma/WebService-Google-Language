@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 
 use WebService::Google::Language;
 
@@ -50,7 +50,10 @@ like   $@, qr'^An HTTP error occured', 'mock HTTP error';
 like   $@, qr'\bkey=your-api-key\b', 'API key';
 
 eval { $service->translate('Hallo Welt' . ' ' x 1963 . '!') };
-like   $@, qr/^Couldn't parse response/, 'URL max length / mock JSON error';
+like   $@, qr/^Couldn't parse response/, 'URL max length (translate) / mock JSON error';
 
 eval { $service->translate('Hallo Welt' . ' ' x 4990 . '!') };
 like   $@, qr'^Google does not allow', 'text max length';
+
+eval { $service->detect('Hallo Welt' . ' ' x 1981 . '!') };
+like   $@, qr'length of.* URL.* exceeds.* maximum', 'URL max length (detect)';

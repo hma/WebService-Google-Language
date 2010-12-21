@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 32;
 
 use WebService::Google::Language;
 
@@ -38,18 +38,23 @@ ok ! @ret, 'Call to translate without text returned nothing';
 ok ! @ret, 'Call to translate with whitespace-only text returned nothing';
 
 SKIP: {
-  skip NO_INTERNET, 14 unless $internet;
+  skip NO_INTERNET, 16 unless $internet;
 
   my $result = eval { $service->translate('Hallo Welt') };
 
   ok     defined $result, 'translate returned something'
-           or skip 'no result (translate failed)', 13;
+           or skip 'no result (translate failed)', 15;
   isa_ok $result, 'WebService::Google::Language::Result';
   can_ok $result, qw'error translation language'
-           or skip 'result misses some methods', 11;
+           or skip 'result misses some methods', 13;
   ok     !$result->error, 'Google could handle translate request';
   is     lc $result->translation, 'hello world', 'Translation is correct';
   is     $result->language, 'de', 'Detected language is correct';
+
+  $result = eval { $service->translate('Hallo Welt', src => 'de') };
+  ok     defined $result, 'translate returned something'
+           or skip 'no result (translate failed)', 9;
+  ok     !defined $result->language, 'No language detection';
 
   $result = eval { $service->translate('Hallo Welt', src => 'xx') };
 

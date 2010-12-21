@@ -175,10 +175,12 @@ sub _request {
   my $length = length $uri;
   if ($length > URL_MAX_LENGTH) {
     if (defined $langpair) {
+      # POST only for translate
       $uri->query_form( [] );
       $response = $self->ua->post( $uri, \@param, referer => $self->referer );
     }
     else {
+      # detect can't be POSTed
       Carp::croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of "
         . URL_MAX_LENGTH . ' bytes. Shorten your parameters.';
     }
