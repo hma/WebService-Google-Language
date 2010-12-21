@@ -49,7 +49,7 @@ like   $@, qr'^An HTTP error occured', 'mock HTTP error';
 
 like   $@, qr'\bkey=your-api-key\b', 'API key';
 
-eval { $service->translate('Hallo Welt' . ' ' x 1962 . '!') };
+eval { $service->translate('Hallo Welt' . ' ' x 1963 . '!') };
 like   $@, qr/^Couldn't parse response/, 'URL max length / mock JSON error';
 
 eval { $service->translate('Hallo Welt' . ' ' x 4990 . '!') };

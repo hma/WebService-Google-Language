@@ -18,7 +18,7 @@ use constant GOOGLE_DETECT_URL    => 'http://ajax.googleapis.com/ajax/services/l
 use constant GOOGLE_TRANSLATE_URL => 'http://ajax.googleapis.com/ajax/services/language/translate';
 use constant API_VERSION          => '1.0';
 use constant MAX_LENGTH           => 5000;
-use constant URL_MAX_LENGTH       => 2072;
+use constant URL_MAX_LENGTH       => 2073;
 
 
 
