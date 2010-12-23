@@ -11,7 +11,7 @@ use constant NO_INTERNET => q{Can't reach Google (no internet access?)};
 use constant REFERER     => 'http://search.cpan.org/dist/WebService-Google-Language/';
 use constant WHITESPACE  => " \n \t ";
 
-my $service = WebService::Google::Language->new( referer => REFERER );
+my $service = WebService::Google::Language->new(REFERER);
 
 
 

@@ -20,7 +20,7 @@ my %accessors = (
 
 plan tests => (9 * keys %accessors) + 1;
 
-my $service = WebService::Google::Language->new( referer => REFERER );
+my $service = WebService::Google::Language->new(REFERER);
 
 for my $accessor (sort keys %accessors) {
   can_ok $service, $accessor;

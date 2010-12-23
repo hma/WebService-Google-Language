@@ -48,9 +48,10 @@ DEPENDENCIES
 
 This module requires these other modules:
 
+    HTTP::Response      (required by "make test")
     JSON 2.0+
     LWP::UserAgent
-    Test::More 0.62+    (required by "make test")
+    Test::More 0.62+    ("make test")
     URI
 
 

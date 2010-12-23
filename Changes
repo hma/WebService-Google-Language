@@ -1,12 +1,12 @@
 Revision history for Perl extension WebService-Google-Language
 
-0.12_01 Dec 21, 2010
+0.12_01 Dec 23, 2010
 
-        - Switch GitHub URL to https
-        - Explicitly require Test::More 0.62 in tests
-        - Accessor for referer string
-        - More test coverage
         - FIX: URL maximum length for GET is 2073 (+1 octet)
+        - Accessor for referer string
+        - Full test coverage for everything but Perl 5.6
+        - Explicitly require Test::More 0.62 in tests
+        - Switch GitHub URL to https
 
 0.12    Oct 10, 2010
 
