@@ -7,11 +7,13 @@ use Test::More;
 
 use WebService::Google::Language;
 
-my $result = bless {}, 'WebService::Google::Language::Result';
-
 my @accessors = qw'error code message translation language is_reliable confidence';
 
-plan tests => 2 * @accessors;
+plan tests => 1 + 2 * @accessors;
+
+my $result = bless {}, 'WebService::Google::Language::Result';
+
+can_ok $result, @accessors;
 
 for (@accessors) {
   my @ret = $result->$_;

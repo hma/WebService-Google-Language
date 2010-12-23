@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 32;
+use Test::More tests => 29;
 
 use WebService::Google::Language;
 
@@ -38,31 +38,27 @@ ok ! @ret, 'Call to translate without text returned nothing';
 ok ! @ret, 'Call to translate with whitespace-only text returned nothing';
 
 SKIP: {
-  skip NO_INTERNET, 16 unless $internet;
+  skip NO_INTERNET, 14 unless $internet;
 
   my $result = eval { $service->translate('Hallo Welt') };
 
   ok     defined $result, 'translate returned something'
-           or skip 'no result (translate failed)', 15;
+           or skip 'no result (translate failed)', 13;
   isa_ok $result, 'WebService::Google::Language::Result';
-  can_ok $result, qw'error translation language'
-           or skip 'result misses some methods', 13;
   ok     !$result->error, 'Google could handle translate request';
   is     lc $result->translation, 'hello world', 'Translation is correct';
   is     $result->language, 'de', 'Detected language is correct';
 
   $result = eval { $service->translate('Hallo Welt', src => 'de') };
   ok     defined $result, 'translate returned something'
-           or skip 'no result (translate failed)', 9;
+           or skip 'no result (translate failed)', 8;
   ok     !defined $result->language, 'No language detection';
 
   $result = eval { $service->translate('Hallo Welt', src => 'xx') };
 
   ok     defined $result, 'translate returned something'
-           or skip 'no result (translate failed)', 7;
+           or skip 'no result (translate failed)', 6;
   isa_ok $result, 'WebService::Google::Language::Result';
-  can_ok $result, qw'error code message'
-           or skip 'result misses some methods', 5;
   ok     $result->error, 'Google returned an error as expected';
   isnt   $result->code, 200, 'Returned code indicates an error';
   ok     $result->message, 'Error message provided';
@@ -90,15 +86,13 @@ ok ! @ret, 'Call to detect without text returned nothing';
 ok ! @ret, 'Call to detect with whitespace-only text returned nothing';
 
 SKIP: {
-  skip NO_INTERNET, 7 unless $internet;
+  skip NO_INTERNET, 6 unless $internet;
 
   my $result = eval { $service->detect( q{Bonjour tout le monde! Comment allez-vous aujourd'hui?} ) };
 
   ok     defined $result, 'detect returned something'
-           or skip 'no result (detect failed)', 6;
+           or skip 'no result (detect failed)', 5;
   isa_ok $result, 'WebService::Google::Language::Result';
-  can_ok $result, qw'error language is_reliable confidence'
-           or skip 'result misses some methods', 4;
   ok     !$result->error, 'Google could handle detect request';
   is     $result->language, 'fr', 'Detected language is correct';
   ok     defined $result->is_reliable, 'Detected language has defined reliability';
