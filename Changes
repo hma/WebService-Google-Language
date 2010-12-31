@@ -1,6 +1,6 @@
 Revision history for Perl extension WebService-Google-Language
 
-0.12_01 Dec 23, 2010
+0.13    Dec 31, 2010
 
         - FIX: URL maximum length for GET is 2073 (+1 octet)
         - Accessor for referer string
