@@ -5,9 +5,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.13';
-
-$VERSION = eval $VERSION;
+our $VERSION = '0.13_01';
 
 use Carp ();
 use JSON 2.0 ();
@@ -260,7 +258,7 @@ sub confidence {
 
 
 
-1;
+$VERSION = eval $VERSION;
 
 __END__
 
@@ -539,7 +537,7 @@ of URLs when using GET request method.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2008-2010 Henning Manske. All rights reserved.
+Copyright (c) 2008-2011 Henning Manske. All rights reserved.
 
 This module is free software. You can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
