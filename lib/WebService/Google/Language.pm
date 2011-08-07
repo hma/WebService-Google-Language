@@ -18,206 +18,204 @@ use constant API_VERSION          => '1.0';
 use constant MAX_LENGTH           => 5000;
 use constant URL_MAX_LENGTH       => 2073;
 
-
-
 #
 #  constructor
 #
 
 sub new {
-  my $class = shift;
-  my $self = bless {}, $class;
+    my $class = shift;
+    my $self = bless {}, $class;
 
-  unshift @_, 'referer' if @_ % 2;
-  my %conf = @_;
+    unshift @_, 'referer' if @_ % 2;
+    my %conf = @_;
 
-  $self->referer(delete $conf{referer});
+    $self->referer( delete $conf{referer} );
 
-  for (qw'src dest key') {
-    if (defined(my $value = delete $conf{$_})) {
-      $self->{$_} = $value;
+    for (qw'src dest key format') {
+        if ( defined( my $value = delete $conf{$_} ) ) {
+            $self->{$_} = $value;
+        }
     }
-  }
 
-  for (qw'json ua') {
-    if (defined(my $value = delete $conf{$_})) {
-      $self->$_($value);
+    for (qw'json ua') {
+        if ( defined( my $value = delete $conf{$_} ) ) {
+            $self->$_($value);
+        }
     }
-  }
-  unless ($self->json) {
-    $self->json(JSON->new);
-  }
-  unless ($self->ua) {
-    $conf{agent} = $class . ' ' . $class->VERSION
-      unless defined $conf{agent};
-    # respect proxy environment variables (reported by IZUT)
-    $conf{env_proxy} = 1
-      unless exists $conf{env_proxy};
-    $self->ua(LWP::UserAgent->new(%conf));
-  }
+    unless ( $self->json ) {
+        $self->json( JSON->new );
+    }
+    unless ( $self->ua ) {
+        $conf{agent} = $class . ' ' . $class->VERSION
+          unless defined $conf{agent};
 
-  return $self;
+        # respect proxy environment variables (reported by IZUT)
+        $conf{env_proxy} = 1
+          unless exists $conf{env_proxy};
+        $self->ua( LWP::UserAgent->new(%conf) );
+    }
+
+    return $self;
 }
-
-
 
 #
 #  public methods
 #
 
 sub translate {
-  my $self = shift;
-  unshift @_, 'text' if @_ % 2;
-  my %args = @_;
-  my $src  = $args{src}  || $self->{src}  || '';
-  my $dest = $args{dest} || $self->{dest} || 'en';
-  return $self->_request($args{text}, $src . '|' . $dest);
+    my $self = shift;
+    unshift @_, 'text' if @_ % 2;
+    my %args = @_;
+    my $src  = $args{src} || $self->{src} || '';
+    my $dest = $args{dest} || $self->{dest} || 'en';
+    return $self->_request( $args{text}, $src . '|' . $dest );
 }
 
 sub detect {
-  my $self = shift;
-  unshift @_, 'text' if @_ % 2;
-  my %args = @_;
-  return $self->_request($args{text});
+    my $self = shift;
+    unshift @_, 'text' if @_ % 2;
+    my %args = @_;
+    return $self->_request( $args{text} );
 }
 
 *detect_language = \&detect;
 
 sub ping {
-  my $self = shift;
-  return $self->ua
-    ->get( GOOGLE_TRANSLATE_URL, referer => $self->referer )
-    ->is_success;
+    my $self = shift;
+    return $self->ua->get( GOOGLE_TRANSLATE_URL, referer => $self->referer )->is_success;
 }
-
-
 
 #
 #  accessors
 #
 
 sub json {
-  my $self = shift;
-  if (@_) {
-    my $json = shift;
-    Carp::croak q{'json' requires an object based on 'JSON'}
-      unless $json && $json->isa('JSON');
-    $self->{json} = $json;
-    return $self;
-  }
-  $self->{json};
+    my $self = shift;
+    if (@_) {
+        my $json = shift;
+        Carp::croak q{'json' requires an object based on 'JSON'}
+          unless $json && $json->isa('JSON');
+        $self->{json} = $json;
+        return $self;
+    }
+    $self->{json};
 }
 
 sub referer {
-  my $self = shift;
-  if (@_) {
-    my $referer = shift;
-    unless (defined $referer && $referer =~ /\S/) {
-      my $name    = q{'referer'};
-      my $error   = 'requires a non-empty parameter';
-      my $caller  = (caller(1))[3];
-      Carp::croak $caller && $caller eq ref($self) . '::new'
-        ? "Constructor $error $name"
-        : "$name $error";
+    my $self = shift;
+    if (@_) {
+        my $referer = shift;
+        unless ( defined $referer && $referer =~ /\S/ ) {
+            my $name   = q{'referer'};
+            my $error  = 'requires a non-empty parameter';
+            my $caller = ( caller(1) )[3];
+            Carp::croak $caller && $caller eq ref($self) . '::new'
+              ? "Constructor $error $name"
+              : "$name $error";
+        }
+        $self->{referer} = $referer;
+        return $self;
     }
-    $self->{referer} = $referer;
-    return $self;
-  }
-  $self->{referer};
+    $self->{referer};
+}
+
+sub format {
+
+    my $self = shift;
+    if (@_) {
+        my $format = shift;
+        $self->{format} = $format;
+        return $self;
+    }
+    $self->{format};
 }
 
 sub ua {
-  my $self = shift;
-  if (@_) {
-    my $ua = shift;
-    Carp::croak q{'ua' requires an object based on 'LWP::UserAgent'}
-      unless $ua && $ua->isa('LWP::UserAgent');
-    $self->{ua} = $ua;
-    return $self;
-  }
-  $self->{ua};
+    my $self = shift;
+    if (@_) {
+        my $ua = shift;
+        Carp::croak q{'ua' requires an object based on 'LWP::UserAgent'}
+          unless $ua && $ua->isa('LWP::UserAgent');
+        $self->{ua} = $ua;
+        return $self;
+    }
+    $self->{ua};
 }
-
-
 
 #
 #  private methods and functions
 #
 
 sub _request {
-  my ($self, $text, $langpair) = @_;
-  if (defined $text && $text =~ /\S/) {
-    _utf8_encode($text);
-    if (length $text > MAX_LENGTH) {
-      Carp::croak 'Google does not allow submission of text exceeding '
-        . MAX_LENGTH . ' characters in length';
+    my ( $self, $text, $langpair ) = @_;
+    if ( defined $text && $text =~ /\S/ ) {
+        _utf8_encode($text);
+        if ( length $text > MAX_LENGTH ) {
+            Carp::croak 'Google does not allow submission of text exceeding ' . MAX_LENGTH . ' characters in length';
+        }
+    } else {
+        return;
     }
-  }
-  else {
-    return;
-  }
 
-  my ($uri, $response);
-  my @param = ( v => API_VERSION );
-  push @param, key => $self->{key} if defined $self->{key};
-  if (defined $langpair) {
-    $uri = URI->new(GOOGLE_TRANSLATE_URL);
-    push @param, langpair => $langpair;
-  }
-  else {
-    $uri = URI->new(GOOGLE_DETECT_URL);
-  }
-  push @param, q => $text;
-  $uri->query_form(\@param);
+    my ( $uri, $response );
+    my @param = ( v => API_VERSION );
+    push @param, key => $self->{key} if defined $self->{key};
 
-  my $length = length $uri;
-  if ($length > URL_MAX_LENGTH) {
-    if (defined $langpair) {
-      # POST only for translate
-      $uri->query_form( [] );
-      $response = $self->ua->post( $uri, \@param, referer => $self->referer );
+    if ( defined $langpair ) {
+        $uri = URI->new(GOOGLE_TRANSLATE_URL);
+        push @param, format   => $self->{format};
+        push @param, langpair => $langpair;
+    } else {
+        $uri = URI->new(GOOGLE_DETECT_URL);
     }
-    else {
-      # detect can't be POSTed
-      Carp::croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of "
-        . URL_MAX_LENGTH . ' bytes. Shorten your parameters.';
-    }
-  }
-  else {
-    $response = $self->ua->get( $uri, referer => $self->referer );
-  }
+    push @param, q => $text;
+    $uri->query_form( \@param );
 
-  if ($response->is_success) {
-    my $result = eval { $self->json->decode($response->content) };
-    if ($@) {
-      Carp::croak "Couldn't parse response from '$uri': $@";
+    my $length = length $uri;
+    if ( $length > URL_MAX_LENGTH ) {
+        if ( defined $langpair ) {
+
+            # POST only for translate
+            $uri->query_form( [] );
+            $response = $self->ua->post( $uri, \@param, referer => $self->referer );
+        } else {
+
+            # detect can't be POSTed
+            Carp::croak "The length of the generated URL for this request is $length bytes and exceeds the maximum of " . URL_MAX_LENGTH . ' bytes. Shorten your parameters.';
+        }
+    } else {
+        $response = $self->ua->get( $uri, referer => $self->referer );
     }
-    else {
-      return bless $result, 'WebService::Google::Language::Result';
+
+    if ( $response->is_success ) {
+        my $result = eval { $self->json->decode( $response->content ) };
+        if ($@) {
+            Carp::croak "Couldn't parse response from '$uri': $@";
+        } else {
+            return bless $result, 'WebService::Google::Language::Result';
+        }
+    } else {
+        Carp::croak "An HTTP error occured while getting '$uri': " . $response->status_line;
     }
-  }
-  else {
-    Carp::croak "An HTTP error occured while getting '$uri': " . $response->status_line;
-  }
 }
 
 sub _utf8_encode {
-  if ($] < 5.007) {
+    if ( $] < 5.007 ) {
 
-    # on Perl 5.6 the JSON 2 module (JSON::PP56) provides the missing
-    # utf8::encode function, but it seems to be broken
-    # my own UTF8 encoder is tested on ActivePerl 5.6.1.638
+        # on Perl 5.6 the JSON 2 module (JSON::PP56) provides the missing
+        # utf8::encode function, but it seems to be broken
+        # my own UTF8 encoder is tested on ActivePerl 5.6.1.638
 
-    if (length $_[0] == do { use bytes; length $_[0] }) {
-      $_[0] = pack 'U*', unpack 'C*', $_[0];
+        if (
+            length $_[0] == do { use bytes; length $_[0] }
+          )
+        {
+            $_[0] = pack 'U*', unpack 'C*', $_[0];
+        }
+    } else {
+        utf8::encode( $_[0] );
     }
-  }
-  else {
-    utf8::encode($_[0]);
-  }
 }
-
-
 
 #
 #  convenience accessor methods to result hash
@@ -226,11 +224,12 @@ sub _utf8_encode {
 package WebService::Google::Language::Result;
 
 sub error {
-  $_[0]->{responseStatus} && $_[0]->{responseStatus} != 200
-    ? { code    => $_[0]->{responseStatus},
+    $_[0]->{responseStatus} && $_[0]->{responseStatus} != 200
+      ? {
+        code    => $_[0]->{responseStatus},
         message => $_[0]->{responseDetails},
       }
-    : undef
+      : undef;
 }
 
 sub code { $_[0]->{responseStatus} }
@@ -238,25 +237,22 @@ sub code { $_[0]->{responseStatus} }
 sub message { $_[0]->{responseDetails} }
 
 sub translation {
-  $_[0]->{responseData} ? $_[0]->{responseData}{translatedText} : undef
+    $_[0]->{responseData} ? $_[0]->{responseData}{translatedText} : undef;
 }
 
 sub language {
-  $_[0]->{responseData}
-    ? $_[0]->{responseData}{language} ||
-      $_[0]->{responseData}{detectedSourceLanguage}
-    : undef
+    $_[0]->{responseData}
+      ? $_[0]->{responseData}{language} || $_[0]->{responseData}{detectedSourceLanguage}
+      : undef;
 }
 
 sub is_reliable {
-  $_[0]->{responseData} ? $_[0]->{responseData}{isReliable} : undef
+    $_[0]->{responseData} ? $_[0]->{responseData}{isReliable} : undef;
 }
 
 sub confidence {
-  $_[0]->{responseData} ? $_[0]->{responseData}{confidence} : undef
+    $_[0]->{responseData} ? $_[0]->{responseData}{confidence} : undef;
 }
-
-
 
 $VERSION = eval $VERSION;
 
@@ -317,6 +313,7 @@ Key/value pair arguments set up the initial state:
   key       recommended   application's key
   ua        optional      an LWP::UserAgent object for reuse
   json      optional      a JSON object for reuse
+  format    optional      html|text 
 
 Since Google demands a "valid and accurate http referer header" in
 requests to their service, a non-empty referer string must be passed
@@ -444,6 +441,12 @@ Returns/sets the C<LWP::UserAgent> object.
 =item $service = $service->referer($referer);
 
 Returns/sets the referer string.
+
+=item $format = $service->format;
+
+=item $service = $service->format($format);
+
+Returns/sets the format type.
 
 =back
 

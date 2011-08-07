@@ -1,5 +1,9 @@
 Revision history for Perl extension WebService-Google-Language
 
+0.13_02 Aug 07, 2011
+
+        - Accessor and support for format 
+
 0.13_01 May 27, 2011
 
         - Minor cosmetic changes
