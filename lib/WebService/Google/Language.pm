@@ -188,7 +188,7 @@ sub _request {
     }
 
     if ( $response->is_success ) {
-        my $result = eval { $self->json->decode( $response->content ) };
+        my $result = eval { $self->json->utf8->decode( $response->content ) };
         if ($@) {
             Carp::croak "Couldn't parse response from '$uri': $@";
         } else {
