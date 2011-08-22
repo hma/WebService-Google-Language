@@ -163,7 +163,7 @@ sub _request {
 
     if ( defined $langpair ) {
         $uri = URI->new(GOOGLE_TRANSLATE_URL);
-        push @param, format   => $self->{format};
+        push @param, format   => ($self->{format} || 'text' );
         push @param, langpair => $langpair;
     } else {
         $uri = URI->new(GOOGLE_DETECT_URL);
