@@ -8,6 +8,14 @@ The AJAX Language API is a web service to translate and detect the language
 of blocks of text.
 
 
+DEPRECATION WARNING
+
+The v1 API, which this module is based on, WILL BE SHUT OFF COMPLETELY
+by Google on Dec 1, 2011.
+
+See http://code.google.com/apis/language/translate/overview.html
+
+
 SYNOPSIS
 
     use WebService::Google::Language;

@@ -5,6 +5,19 @@ use warnings;
 
 use ExtUtils::MakeMaker 6.17;
 
+print <<END;
+
+DEPRECATION WARNING
+
+The v1 API, which this module is based on, WILL BE SHUT OFF COMPLETELY
+by Google on Dec 1, 2011.
+
+See http://code.google.com/apis/language/translate/overview.html
+
+END
+
+sleep 5;
+
 my $eumm = eval ExtUtils::MakeMaker->VERSION;
 
 my $knows_license            = $eumm >= 6.3001;

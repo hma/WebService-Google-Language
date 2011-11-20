@@ -1,7 +1,7 @@
 #!perl
 #
 #  xt/author/spelling.t 0.02 hma Sep 23, 2010
-#  WebService-Google-Language customized stopwords 0.01 hma Sep 23, 2010
+#  WebService-Google-Language customized stopwords 0.02 hma Nov 20, 2011
 #
 #  Check for spelling errors in POD files
 #  RELEASE_TESTING only
@@ -65,6 +65,7 @@ IZUT
 # tech
 
 API
+APIs
 http referer
 internet
 JavaScript

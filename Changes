@@ -1,8 +1,9 @@
 Revision history for Perl extension WebService-Google-Language
 
-0.13_01 May 27, 2011
+0.14    Nov 20, 2011
 
-        - Minor cosmetic changes
+        - Add deprecation warnings
+        - Disable live tests by default
 
 0.13    Dec 31, 2010
 

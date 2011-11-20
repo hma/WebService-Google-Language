@@ -8,6 +8,7 @@ use Test::More tests => 29;
 use WebService::Google::Language;
 
 use constant NO_INTERNET => q{Can't reach Google (no internet access?)};
+use constant FORCE_TESTS => 'Set $ENV{WGL_FORCE_LIVE_TESTS} to enable live tests';
 use constant REFERER     => 'http://search.cpan.org/dist/WebService-Google-Language/';
 use constant WHITESPACE  => " \n \t ";
 
@@ -38,6 +39,7 @@ ok ! @ret, 'Call to translate without text returned nothing';
 ok ! @ret, 'Call to translate with whitespace-only text returned nothing';
 
 SKIP: {
+  skip FORCE_TESTS, 14 unless $ENV{WGL_FORCE_LIVE_TESTS};
   skip NO_INTERNET, 14 unless $internet;
 
   my $result = eval { $service->translate('Hallo Welt') };
@@ -86,6 +88,7 @@ ok ! @ret, 'Call to detect without text returned nothing';
 ok ! @ret, 'Call to detect with whitespace-only text returned nothing';
 
 SKIP: {
+  skip FORCE_TESTS, 6 unless $ENV{WGL_FORCE_LIVE_TESTS};
   skip NO_INTERNET, 6 unless $internet;
 
   my $result = eval { $service->detect( q{Bonjour tout le monde! Comment allez-vous aujourd'hui?} ) };
